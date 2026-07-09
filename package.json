@@ -9,5 +9,10 @@
   "engines": {
     "node": ">=18"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fredric27/bonjour-claude.git"
+  },
+  "author": "Federico Buffagni (https://github.com/fredric27)",
   "license": "MIT"
 }

@@ -27,7 +27,7 @@ runtime dependencies.
 ## Installation
 
 ```sh
-git clone <repo-url> bonjour-claude
+git clone https://github.com/fredric27/bonjour-claude.git
 cd bonjour-claude
 npm install -g .
 ```
@@ -63,7 +63,7 @@ Full flow from a blank server:
 # 1. Install Node and Claude Code (see Requirements)
 
 # 2. Install bonjour-claude
-git clone <repo-url> && cd bonjour-claude && npm install -g .
+git clone https://github.com/fredric27/bonjour-claude.git && cd bonjour-claude && npm install -g .
 
 # 3. Login: the guided flow runs `claude setup-token`
 #    (it gives you a URL to open on your own computer, you authorize with
