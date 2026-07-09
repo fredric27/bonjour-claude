@@ -6,6 +6,12 @@ import { DEFAULT_MESSAGE, loadConfig, saveState } from "./config.js";
 
 const SEND_TIMEOUT_MS = 2 * 60 * 1000;
 
+// Cheapest model in the lineup: the session window starts regardless of the
+// model, so the wake-up message burns as few tokens as possible. The --model
+// flag only applies to this one -p invocation — it never touches the model
+// the user has configured for interactive Claude Code sessions.
+const SEND_MODEL = "haiku";
+
 // Sends the message via `claude -p`: uses the OAuth login already present on
 // the machine, or the token stored with `bonjour-claude login` (for servers).
 export function sendMessage() {
@@ -32,7 +38,7 @@ export function sendMessage() {
       resolve(result);
     };
 
-    const child = spawn("claude", ["-p", message], {
+    const child = spawn("claude", ["-p", message, "--model", SEND_MODEL], {
       cwd,
       env,
       stdio: ["ignore", "pipe", "pipe"],

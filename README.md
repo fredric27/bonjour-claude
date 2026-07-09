@@ -17,6 +17,12 @@ No claude.ai reverse-engineering: the message is sent with `claude -p`, so it
 uses your Anthropic account exactly like a normal Claude Code session. Zero
 runtime dependencies.
 
+To waste as few tokens as possible, the message is sent to **Haiku** (the
+cheapest model in the lineup — the session window starts regardless of which
+model you talk to). The model override applies only to that single background
+invocation: whatever model you've configured for your interactive Claude Code
+sessions stays untouched.
+
 ## Requirements
 
 - **Node.js ≥ 18** — <https://nodejs.org>
