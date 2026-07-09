@@ -13,7 +13,7 @@ export function systemTimeZone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
-// Ora "da orologio a muro" di un istante nel fuso indicato.
+// Wall-clock time of an instant in the given timezone.
 function wallClock(date, tz) {
   const fmt = new Intl.DateTimeFormat("en-CA", {
     timeZone: tz,
@@ -33,15 +33,15 @@ function wallClock(date, tz) {
   return parts;
 }
 
-// Offset (ms) del fuso rispetto a UTC nell'istante dato.
+// Offset (ms) of the timezone relative to UTC at the given instant.
 function tzOffsetMs(date, tz) {
   const w = wallClock(date, tz);
   const asUtc = Date.UTC(w.year, w.month - 1, w.day, w.hour, w.minute, w.second);
   return asUtc - Math.floor(date.getTime() / 1000) * 1000;
 }
 
-// Istante UTC corrispondente al wall-clock y-m-d hh:mm nel fuso indicato.
-// L'offset dipende dall'istante stesso (DST), quindi si itera per convergere.
+// UTC instant matching the wall-clock y-m-d hh:mm in the given timezone.
+// The offset depends on the instant itself (DST), so iterate to converge.
 function utcInstantFor(year, month, day, hh, mm, tz) {
   const asUtc = Date.UTC(year, month - 1, day, hh, mm, 0);
   let ts = asUtc;
@@ -51,7 +51,7 @@ function utcInstantFor(year, month, day, hh, mm, tz) {
   return new Date(ts);
 }
 
-// Prossimo istante (Date UTC) in cui nel fuso `tz` l'orologio segna hh:mm.
+// Next instant (UTC Date) at which the clock in timezone `tz` reads hh:mm.
 export function nextOccurrence(hh, mm, tz, now = new Date()) {
   for (let k = 0; k < 3; k++) {
     const ref = new Date(now.getTime() + k * DAY_MS);
@@ -59,11 +59,11 @@ export function nextOccurrence(hh, mm, tz, now = new Date()) {
     const candidate = utcInstantFor(w.year, w.month, w.day, hh, mm, tz);
     if (candidate.getTime() > now.getTime()) return candidate;
   }
-  throw new Error(`Impossibile calcolare la prossima occorrenza di ${hh}:${mm} in ${tz}`);
+  throw new Error(`Cannot compute the next occurrence of ${hh}:${mm} in ${tz}`);
 }
 
 export function formatInTz(date, tz) {
-  return date.toLocaleString("it-IT", {
+  return date.toLocaleString("en-GB", {
     timeZone: tz,
     weekday: "short",
     year: "numeric",
@@ -75,8 +75,8 @@ export function formatInTz(date, tz) {
   });
 }
 
-// Attende fino all'istante dato. Si risveglia almeno ogni ora e ricontrolla
-// l'orologio, così sospensioni della macchina o derive del timer non sfasano.
+// Waits until the given instant. Wakes up at least once an hour and re-checks
+// the clock, so machine suspends or timer drift don't throw it off.
 export function sleepUntil(date) {
   return new Promise((resolve) => {
     const tick = () => {

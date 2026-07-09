@@ -18,7 +18,7 @@ function readJson(path) {
   }
 }
 
-// Il config può contenere il token OAuth: dir 0700, file 0600.
+// The config may contain the OAuth token: dir 0700, files 0600.
 function writeJson(path, data) {
   mkdirSync(configDir, { recursive: true, mode: 0o700 });
   writeFileSync(path, JSON.stringify(data, null, 2) + "\n", { mode: 0o600 });

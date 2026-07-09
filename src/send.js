@@ -6,15 +6,15 @@ import { DEFAULT_MESSAGE, loadConfig, saveState } from "./config.js";
 
 const SEND_TIMEOUT_MS = 2 * 60 * 1000;
 
-// Manda il messaggio con `claude -p`: usa il login OAuth già presente sulla
-// macchina, oppure il token salvato con `bonjour-claude login` (per i server).
+// Sends the message via `claude -p`: uses the OAuth login already present on
+// the machine, or the token stored with `bonjour-claude login` (for servers).
 export function sendMessage() {
   const config = loadConfig();
   const message = config.message || DEFAULT_MESSAGE;
   const env = { ...process.env };
   if (config.token) env.CLAUDE_CODE_OAUTH_TOKEN = config.token;
 
-  // cwd in una dir vuota, per non caricare il contesto di nessun progetto
+  // cwd in an empty dir, so no project context gets loaded
   const cwd = mkdtempSync(join(tmpdir(), "bonjour-claude-"));
 
   return new Promise((resolve) => {
@@ -45,18 +45,18 @@ export function sendMessage() {
 
     const timer = setTimeout(() => {
       child.kill("SIGKILL");
-      finish(false, "timeout: nessuna risposta da claude entro 2 minuti");
+      finish(false, "timeout: no response from claude within 2 minutes");
     }, SEND_TIMEOUT_MS);
 
     child.on("error", (e) => {
       clearTimeout(timer);
-      finish(false, `impossibile eseguire "claude": ${e.message} — è installato Claude Code?`);
+      finish(false, `cannot run "claude": ${e.message} — is Claude Code installed?`);
     });
 
     child.on("close", (code) => {
       clearTimeout(timer);
       if (code === 0) finish(true, out);
-      else finish(false, err || out || `claude è uscito con codice ${code} (sei loggato?)`);
+      else finish(false, err || out || `claude exited with code ${code} (are you logged in?)`);
     });
   });
 }

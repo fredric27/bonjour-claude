@@ -1,81 +1,92 @@
 # bonjour-claude ☕
 
-Manda in automatico un messaggino a Claude a un orario prestabilito, così la
-finestra di sessione di 5 ore di Claude Code parte da sola prima che tu ti
-sieda alla scrivania.
+**Start your Claude Code 5-hour session window automatically, right on schedule.**
 
-Zero dipendenze: il messaggio viene inviato con `claude -p`, quindi usa il tuo
-account Anthropic esattamente come una sessione normale.
+Claude subscription plans (Pro/Max) meter Claude Code usage in 5-hour session
+windows: the window starts with your first message and ends 5 hours later. If
+you sit down at your desk at 9:00 and send your first message then, your window
+runs 9:00–14:00.
 
-## Prerequisiti
+bonjour-claude sends a tiny, one-line message to Claude at a time you choose —
+for example 8:00 — so the session window is already running before you start
+your day, and you get the most out of each window. That's it. It's a small
+daemon that says *"Bonjour Claude!"* on your behalf, once a day, in your
+timezone.
+
+No claude.ai reverse-engineering: the message is sent with `claude -p`, so it
+uses your Anthropic account exactly like a normal Claude Code session. Zero
+runtime dependencies.
+
+## Requirements
 
 - **Node.js ≥ 18** — <https://nodejs.org>
-- **Claude Code** (il comando `claude`) — `npm install -g @anthropic-ai/claude-code`
-  oppure `curl -fsSL https://claude.ai/install.sh | bash`
-- Un **abbonamento Claude** (Pro/Max): la finestra di 5 ore è quella del tuo account
+- **Claude Code** (the `claude` command) — `npm install -g @anthropic-ai/claude-code`
+  or `curl -fsSL https://claude.ai/install.sh | bash`
+- A **Claude subscription** (Pro/Max): the 5-hour window is your account's
 
-## Installazione
+## Installation
 
 ```sh
-git clone <url-del-repo> bonjour-claude
+git clone <repo-url> bonjour-claude
 cd bonjour-claude
 npm install -g .
 ```
 
-## Uso sul tuo computer
+## Usage on your own machine
 
-Se su questa macchina usi già Claude Code sei già loggato, quindi bastano due comandi:
+If you already use Claude Code on this machine you're already logged in, so two
+commands are enough:
 
 ```sh
-# 1. Scegli l'orario, con fuso orario IANA (default: fuso di sistema)
+# 1. Pick the time, with an IANA timezone (default: system timezone)
 bonjour-claude set 08:00 --tz Europe/Rome
 
-# 2. Avvia il daemon: ogni giorno alle 08:00 manda il messaggio
+# 2. Start the daemon: every day at 08:00 it sends the message
 bonjour-claude start
 ```
 
-Altri comandi:
+Other commands:
 
 ```sh
-bonjour-claude send      # invia subito (utile per verificare che tutto funzioni)
-bonjour-claude status    # config, prossimo invio, esito ultimo invio
-bonjour-claude set 07:30 --message "Bonjour!"   # cambia orario/messaggio
+bonjour-claude send      # send right now (handy to check everything works)
+bonjour-claude status    # config, next send, last send result
+bonjour-claude set 07:30 --message "Bonjour!"   # change time/message
 bonjour-claude help
 ```
 
-## Hosting su un server
+## Hosting on a server
 
-Su un server headless non c'è il login del browser, quindi serve un token
-long-lived. Flusso completo da zero:
+On a headless server there's no browser login, so you need a long-lived token.
+Full flow from a blank server:
 
 ```sh
-# 1. Installa Node e Claude Code (vedi Prerequisiti)
+# 1. Install Node and Claude Code (see Requirements)
 
-# 2. Installa bonjour-claude
-git clone <url-del-repo> && cd bonjour-claude && npm install -g .
+# 2. Install bonjour-claude
+git clone <repo-url> && cd bonjour-claude && npm install -g .
 
-# 3. Login: la procedura guidata lancia `claude setup-token`
-#    (ti dà un URL da aprire sul tuo computer, autorizzi con il tuo account
-#    Anthropic, incolli il codice) e salva il token generato
+# 3. Login: the guided flow runs `claude setup-token`
+#    (it gives you a URL to open on your own computer, you authorize with
+#    your Anthropic account, paste the code back) and stores the token
 bonjour-claude login
 
-# 4. Verifica che l'invio funzioni
+# 4. Check that sending works
 bonjour-claude send
 
-# 5. Configura l'orario nel TUO fuso (il server può essere in UTC, non importa)
+# 5. Set the time in YOUR timezone (the server can be on UTC, doesn't matter)
 bonjour-claude set 08:00 --tz Europe/Rome
 ```
 
-Poi tieni vivo il daemon come preferisci.
+Then keep the daemon alive however you prefer.
 
-Con **tmux** (il più rapido):
+With **tmux** (quickest):
 
 ```sh
 tmux new -d -s bonjour 'bonjour-claude start'
-tmux attach -t bonjour        # per vedere i log
+tmux attach -t bonjour        # to see the logs
 ```
 
-Con **systemd** (riparte da solo al reboot) — crea
+With **systemd** (restarts on reboot) — create
 `~/.config/systemd/user/bonjour-claude.service`:
 
 ```ini
@@ -92,30 +103,30 @@ WantedBy=default.target
 
 ```sh
 systemctl --user enable --now bonjour-claude
-journalctl --user -u bonjour-claude -f     # log
-loginctl enable-linger $USER               # resta attivo anche senza sessione aperta
+journalctl --user -u bonjour-claude -f     # logs
+loginctl enable-linger $USER               # keep it running without an open session
 ```
 
-Con **pm2**:
+With **pm2**:
 
 ```sh
 pm2 start bonjour-claude -- start && pm2 save
 ```
 
-## Note
+## Notes
 
-- La configurazione vive in `~/.config/bonjour-claude/` (file a permessi 600:
-  possono contenere il token OAuth). La posizione è personalizzabile con la
-  variabile d'ambiente `BONJOUR_CLAUDE_DIR`.
-- I fusi orari sono gestiti correttamente anche attraverso i cambi ora
-  legale/solare: l'orario impostato è sempre "ora locale del fuso scelto".
-- Il daemon si risveglia almeno una volta l'ora e ricontrolla l'orologio, quindi
-  sopravvive a sospensioni della macchina senza sfasarsi.
+- Configuration lives in `~/.config/bonjour-claude/` (files with 600
+  permissions: they may contain your OAuth token). The location can be
+  overridden with the `BONJOUR_CLAUDE_DIR` environment variable.
+- Timezones are handled correctly across DST changes: the configured time is
+  always "local wall-clock time of the chosen timezone".
+- The daemon wakes up at least once an hour and re-checks the clock, so it
+  survives machine suspends without drifting.
 
-## Problemi comuni
+## Troubleshooting
 
-| Sintomo | Soluzione |
+| Symptom | Fix |
 | --- | --- |
-| `impossibile eseguire "claude"` | Claude Code non è installato o non è nel PATH del daemon (con systemd controlla il PATH del servizio) |
-| `claude è uscito con codice 1 (sei loggato?)` | Fai `claude` una volta a mano per loggarti, oppure `bonjour-claude login` per salvare un token |
-| Il messaggio parte all'ora sbagliata | Controlla `bonjour-claude status`: il fuso mostrato è quello che conta, non quello del server |
+| `cannot run "claude"` | Claude Code is not installed or not in the daemon's PATH (with systemd, check the service's PATH) |
+| `claude exited with code 1 (are you logged in?)` | Run `claude` once by hand to log in, or `bonjour-claude login` to store a token |
+| Message goes out at the wrong time | Check `bonjour-claude status`: the timezone shown there is the one that counts, not the server's |

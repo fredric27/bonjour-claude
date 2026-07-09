@@ -1,7 +1,7 @@
 {
   "name": "bonjour-claude",
   "version": "1.0.0",
-  "description": "Invia automaticamente un messaggio a Claude a un orario prestabilito per avviare la finestra di sessione di Claude Code",
+  "description": "Automatically send a tiny message to Claude at a scheduled time to start your Claude Code session window",
   "type": "module",
   "bin": {
     "bonjour-claude": "./bin/bonjour-claude.js"
